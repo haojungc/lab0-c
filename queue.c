@@ -18,7 +18,7 @@ queue_t *q_new()
 
     q->head = NULL;
     q->tail = NULL;
-    q->total_ele = 0;
+    q->size = 0;
     return q;
 }
 
@@ -59,9 +59,9 @@ bool q_insert_head(queue_t *q, char *s)
 
     newh->next = q->head;
     q->head = newh;
-    if (q->total_ele == 0)
+    if (q->size == 0)
         q->tail = newh;
-    q->total_ele++;
+    q->size++;
     return true;
 }
 
@@ -93,12 +93,12 @@ bool q_insert_tail(queue_t *q, char *s)
     strncpy(newh->value, s, len + 1);
 
     newh->next = NULL;
-    if (q->total_ele == 0)
+    if (q->size == 0)
         q->head = newh;
     else
         q->tail->next = newh;
     q->tail = newh;
-    q->total_ele++;
+    q->size++;
     return true;
 }
 
@@ -124,7 +124,7 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
  */
 int q_size(queue_t *q)
 {
-    return q ? q->total_ele : 0;
+    return q ? q->size : 0;
 }
 
 /*
