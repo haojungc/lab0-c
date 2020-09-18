@@ -118,9 +118,25 @@ bool q_insert_tail(queue_t *q, char *s)
  */
 bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
 {
-    /* TODO: You need to fix up this code. */
-    /* TODO: Remove the above comment when you are about to implement. */
+    if (!q || !q->head)
+        return false;
+
+    list_ele_t *target = q->head;
     q->head = q->head->next;
+
+    /* Copies removed string to sp */
+    if (sp) {
+        int len = strlen(target->value);
+        int max_len = len > bufsize - 1 ? bufsize - 1 : len;
+        strncpy(sp, target->value, max_len);
+        sp[max_len] = '\0';
+    }
+
+    q->size--;
+    if (q->size == 0)
+        q->tail = NULL;
+    free(target->value);
+    free(target);
     return true;
 }
 
