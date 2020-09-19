@@ -172,22 +172,64 @@ void q_reverse(queue_t *q)
     q->head = prev;
 }
 
-/* Please reference to
- * https://www.geeksforgeeks.org/merge-two-sorted-linked-lists
+/*
+ * Sort elements of queue in ascending order
+ * No effect if q is NULL or empty. In addition, if q has only one
+ * element, do nothing.
  */
-void insert_tail(list_ele_t **dest_ref, list_ele_t **source_ref)
+void q_sort(queue_t *q)
 {
-    /* Points to the first element in the source list  */
-    list_ele_t *new_node = *source_ref;
+    if (q == NULL || q->head == NULL)
+        return;
 
-    /* Advances the source pointer */
-    *source_ref = new_node->next;
+    merge_sort(&q->head);
 
-    /* Links new_node to the first element in the destination list */
-    new_node->next = *dest_ref;
+    // O(n) update for tail
+    // Not a good way! But just leave this here
+    list_ele_t *tmp = q->head;
+    while (tmp->next != NULL)
+        tmp = tmp->next;
 
-    /* Lets new_node become the first element in the destination list */
-    *dest_ref = new_node;
+    q->tail = tmp;
+}
+
+void merge_sort(list_ele_t **head)
+{
+    /* Returns if there are less than two elements */
+    if (*head == NULL || (*head)->next == NULL)
+        return;
+
+    list_ele_t *a;
+    list_ele_t *b;
+
+    front_back_split(*head, &a, &b);
+
+    merge_sort(&a); /* Merges the left part of the list starting from a */
+    merge_sort(&b); /* Merges the right part of the list starting from b */
+
+    *head = merge_sorted_list(a, b);
+}
+
+void front_back_split(list_ele_t *head,
+                      list_ele_t **front_ref,
+                      list_ele_t **back_ref)
+{
+    list_ele_t *slow = head;
+    list_ele_t *fast = head->next;
+
+    /* Finds the middle element (slow) in the list */
+    while (fast != NULL) {
+        fast = fast->next;
+        if (fast != NULL) {
+            slow = slow->next;
+            fast = fast->next;
+        }
+    }
+
+    /* Cuts the list in half */
+    *front_ref = head;
+    *back_ref = slow->next;
+    slow->next = NULL;
 }
 
 list_ele_t *merge_sorted_list(list_ele_t *a, list_ele_t *b)
@@ -220,61 +262,20 @@ list_ele_t *merge_sorted_list(list_ele_t *a, list_ele_t *b)
     return dummy.next;
 }
 
-void front_back_split(list_ele_t *head,
-                      list_ele_t **front_ref,
-                      list_ele_t **back_ref)
-{
-    list_ele_t *slow = head;
-    list_ele_t *fast = head->next;
-
-    /* Finds the middle element (slow) in the list */
-    while (fast != NULL) {
-        fast = fast->next;
-        if (fast != NULL) {
-            slow = slow->next;
-            fast = fast->next;
-        }
-    }
-
-    *front_ref = head;
-    *back_ref = slow->next;
-    slow->next = NULL;
-}
-
-void merge_sort(list_ele_t **head)
-{
-    /* Returns if there are less than two elements */
-    if (*head == NULL || (*head)->next == NULL)
-        return;
-
-    list_ele_t *a;
-    list_ele_t *b;
-
-    front_back_split(*head, &a, &b);
-
-    merge_sort(&a); /* Merges the left part of the list starting from a */
-    merge_sort(&b); /* Merges the right part of the list starting from b */
-
-    *head = merge_sorted_list(a, b);
-}
-
-/*
- * Sort elements of queue in ascending order
- * No effect if q is NULL or empty. In addition, if q has only one
- * element, do nothing.
+/* Please reference to
+ * https://www.geeksforgeeks.org/merge-two-sorted-linked-lists
  */
-void q_sort(queue_t *q)
+void insert_tail(list_ele_t **dest_ref, list_ele_t **source_ref)
 {
-    if (q == NULL || q->head == NULL)
-        return;
+    /* Points to the first element in the source list  */
+    list_ele_t *new_node = *source_ref;
 
-    merge_sort(&q->head);
+    /* Advances the source pointer */
+    *source_ref = new_node->next;
 
-    // O(n) update for tail
-    // Not a good way! But just leave this here
-    list_ele_t *tmp = q->head;
-    while (tmp->next != NULL)
-        tmp = tmp->next;
+    /* Links new_node to the first element in the destination list */
+    new_node->next = *dest_ref;
 
-    q->tail = tmp;
+    /* Lets new_node become the first element in the destination list */
+    *dest_ref = new_node;
 }
