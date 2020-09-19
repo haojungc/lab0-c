@@ -92,6 +92,12 @@ void q_reverse(queue_t *q);
  * element, do nothing.
  */
 void q_sort(queue_t *q);
+void move_node(list_ele_t **destRef, list_ele_t **sourceRef);
+list_ele_t *merge_sorted_list(list_ele_t *a, list_ele_t *b);
+void front_back_split(list_ele_t *head,
+                      list_ele_t **front_ref,
+                      list_ele_t **back_ref);
+void merge_sort(list_ele_t **head);
 
 /* Case insensitive string comparisons using a "natural order" algorithm */
 int strnatcasecmp(const char *s1, const char *s2);

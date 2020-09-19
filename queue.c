@@ -172,6 +172,100 @@ void q_reverse(queue_t *q)
     q->head = prev;
 }
 
+/* Please reference to
+ * https://www.geeksforgeeks.org/merge-two-sorted-linked-lists */
+
+/* move_node() function takes the node from the front of the
+ * source, and move it to the front of the dest.
+ * It is an error to call this with the source list empty.
+ * Before calling MoveNode():
+ * source == {1, 2, 3}
+ * dest == {1, 2, 3}
+ * After calling MoveNode():
+ * source == {2, 3}
+ * dest == {1, 1, 2, 3}
+ */
+void move_node(list_ele_t **dest_ref, list_ele_t **source_ref)
+{
+    /* the front source node  */
+    list_ele_t *new_node = *source_ref;
+
+    /* Advance the source pointer */
+    *source_ref = new_node->next;
+
+    /* Link the old dest off the new node */
+    new_node->next = *dest_ref;
+
+    /* Move dest to point to the new node */
+    *dest_ref = new_node;
+}
+
+list_ele_t *merge_sorted_list(list_ele_t *a, list_ele_t *b)
+{
+    // a dummy first node to hang the result on
+    list_ele_t dummy;
+    // tail points to the last result node
+    list_ele_t *tail = &dummy;
+
+    dummy.next = NULL;
+
+    while (1) {
+        if (a == NULL) {
+            tail->next = b; /* Appends the rest elements in b to the list */
+            break;
+        } else if (b == NULL) {
+            tail->next = a; /* Appends the rest elements in a to the list */
+            break;
+        }
+        if (strcmp(a->value, b->value) < 0) {
+            move_node(&(tail->next), &a);
+        } else {
+            move_node(&(tail->next), &b);
+        }
+
+        tail = tail->next;
+    }
+
+    return dummy.next;
+}
+
+void front_back_split(list_ele_t *head,
+                      list_ele_t **front_ref,
+                      list_ele_t **back_ref)
+{
+    list_ele_t *slow = head;
+    list_ele_t *fast = head->next;
+
+    /* Finds the middle element (slow) in the list */
+    while (fast != NULL) {
+        fast = fast->next;
+        if (fast != NULL) {
+            slow = slow->next;
+            fast = fast->next;
+        }
+    }
+
+    *front_ref = head;
+    *back_ref = slow->next;
+    slow->next = NULL;
+}
+void merge_sort(list_ele_t **head)
+{
+    /* Returns if there are less than two elements */
+    if (*head == NULL || (*head)->next == NULL)
+        return;
+
+    list_ele_t *a;
+    list_ele_t *b;
+
+    front_back_split(*head, &a, &b);
+
+    merge_sort(&a); /* Merges the left part of the list starting from a */
+    merge_sort(&b); /* Merges the right part of the list starting from b */
+
+    *head = merge_sorted_list(a, b);
+}
+
 /*
  * Sort elements of queue in ascending order
  * No effect if q is NULL or empty. In addition, if q has only one
@@ -179,66 +273,17 @@ void q_reverse(queue_t *q)
  */
 void q_sort(queue_t *q)
 {
-    /* Assures there are more than one element in the queue */
-    if (!q || !q->head)
+    if (q == NULL)
         return;
+    if (q->head == NULL)
+        return;
+    merge_sort(&q->head);
 
-    for (list_ele_t **front = &q->head; (*front)->next != NULL;
-         front = &(*front)->next) {
-        list_ele_t **prev_of_min = front;
-        /* Finds the previous element of minimum element in the list */
-        for (list_ele_t **ele = &(*front)->next; *ele != NULL;
-             ele = &(*ele)->next) {
-            bool is_smaller =
-                strnatcasecmp((*ele)->value, (*prev_of_min)->value) < 0;
-            if (is_smaller)
-                prev_of_min = ele;
-        }
-        if (prev_of_min != front) {
-            list_ele_t *min = *prev_of_min;
-            list_ele_t *next = min->next;
+    // O(n) update for tail
+    // Not a good way! But just leave this here
+    list_ele_t *tmp = q->head;
+    while (tmp->next != NULL)
+        tmp = tmp->next;
 
-            if (min->next == NULL)
-                q->tail = *front;
-
-            /* Adjacent elements */
-            if ((*front)->next == *prev_of_min) {
-                min->next = *front;
-                (*front)->next = next;
-            } else {
-                min->next = (*front)->next;
-                (*front)->next = next;
-                *prev_of_min = *front;
-            }
-            *front = min;
-        }
-    }
-}
-
-/* Case insensitive string comparisons using a "natural order" algorithm */
-int strnatcasecmp(const char *s1, const char *s2)
-{
-    /* Converts the first letters to lowercase */
-    char c1 = s1[0] | ' ', c2 = s2[0] | ' ';
-
-    if (c1 < c2)
-        return -1;
-    if (c1 > c2)
-        return 1;
-
-    size_t s1_len = strlen(s1);
-    size_t s2_len = strlen(s2);
-
-    if (s1_len < s2_len)
-        return -1;
-    if (s1_len > s2_len)
-        return 1;
-
-    for (int i = 1; i < s1_len; i++) {
-        c1 = s1[i] | ' ';
-        c2 = s2[i] | ' ';
-        if (c1 != c2)
-            return c1 < c2 ? -1 : 1;
-    }
-    return 0;
+    q->tail = tmp;
 }
