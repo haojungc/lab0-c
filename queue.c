@@ -173,59 +173,50 @@ void q_reverse(queue_t *q)
 }
 
 /* Please reference to
- * https://www.geeksforgeeks.org/merge-two-sorted-linked-lists */
-
-/* move_node() function takes the node from the front of the
- * source, and move it to the front of the dest.
- * It is an error to call this with the source list empty.
- * Before calling MoveNode():
- * source == {1, 2, 3}
- * dest == {1, 2, 3}
- * After calling MoveNode():
- * source == {2, 3}
- * dest == {1, 1, 2, 3}
+ * https://www.geeksforgeeks.org/merge-two-sorted-linked-lists
  */
-void move_node(list_ele_t **dest_ref, list_ele_t **source_ref)
+void insert_tail(list_ele_t **dest_ref, list_ele_t **source_ref)
 {
-    /* the front source node  */
+    /* Points to the first element in the source list  */
     list_ele_t *new_node = *source_ref;
 
-    /* Advance the source pointer */
+    /* Advances the source pointer */
     *source_ref = new_node->next;
 
-    /* Link the old dest off the new node */
+    /* Links new_node to the first element in the destination list */
     new_node->next = *dest_ref;
 
-    /* Move dest to point to the new node */
+    /* Lets new_node become the first element in the destination list */
     *dest_ref = new_node;
 }
 
 list_ele_t *merge_sorted_list(list_ele_t *a, list_ele_t *b)
 {
-    // a dummy first node to hang the result on
-    list_ele_t dummy;
-    // tail points to the last result node
+    list_ele_t dummy; /* dummy.next points to the first element in the
+                         destination list */
     list_ele_t *tail = &dummy;
 
     dummy.next = NULL;
 
     while (1) {
         if (a == NULL) {
-            tail->next = b; /* Appends the rest elements in b to the list */
+            /* Appends the rest elements in b to the list */
+            tail->next = b;
             break;
         } else if (b == NULL) {
-            tail->next = a; /* Appends the rest elements in a to the list */
+            /* Appends the rest elements in a to the list */
+            tail->next = a;
             break;
         }
+        /* Inserts an element to the end of the list */
         if (strcmp(a->value, b->value) < 0) {
-            move_node(&(tail->next), &a);
+            insert_tail(&(tail->next), &a);
         } else {
-            move_node(&(tail->next), &b);
+            insert_tail(&(tail->next), &b);
         }
 
         tail = tail->next;
     }
-
     return dummy.next;
 }
 
@@ -249,6 +240,7 @@ void front_back_split(list_ele_t *head,
     *back_ref = slow->next;
     slow->next = NULL;
 }
+
 void merge_sort(list_ele_t **head)
 {
     /* Returns if there are less than two elements */
@@ -273,10 +265,9 @@ void merge_sort(list_ele_t **head)
  */
 void q_sort(queue_t *q)
 {
-    if (q == NULL)
+    if (q == NULL || q->head == NULL)
         return;
-    if (q->head == NULL)
-        return;
+
     merge_sort(&q->head);
 
     // O(n) update for tail
