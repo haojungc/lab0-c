@@ -93,4 +93,7 @@ void q_reverse(queue_t *q);
  */
 void q_sort(queue_t *q);
 
+/* Case insensitive string comparisons using a "natural order" algorithm */
+int strnatcasecmp(const char *s1, const char *s2);
+
 #endif /* LAB0_QUEUE_H */

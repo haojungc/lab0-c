@@ -179,7 +179,66 @@ void q_reverse(queue_t *q)
  */
 void q_sort(queue_t *q)
 {
-    return;
-    /* TODO: You need to write the code for this function */
-    /* TODO: Remove the above comment when you are about to implement. */
+    /* Assures there are more than one element in the queue */
+    if (!q || !q->head)
+        return;
+
+    for (list_ele_t **front = &q->head; (*front)->next != NULL;
+         front = &(*front)->next) {
+        list_ele_t **prev_of_min = front;
+        /* Finds the previous element of minimum element in the list */
+        for (list_ele_t **ele = &(*front)->next; *ele != NULL;
+             ele = &(*ele)->next) {
+            bool is_smaller =
+                strnatcasecmp((*ele)->value, (*prev_of_min)->value) < 0;
+            if (is_smaller)
+                prev_of_min = ele;
+        }
+        if (prev_of_min != front) {
+            list_ele_t *min = *prev_of_min;
+            list_ele_t *next = min->next;
+
+            if (min->next == NULL)
+                q->tail = *front;
+
+            /* Adjacent elements */
+            if ((*front)->next == *prev_of_min) {
+                min->next = *front;
+                (*front)->next = next;
+            } else {
+                min->next = (*front)->next;
+                (*front)->next = next;
+                *prev_of_min = *front;
+            }
+            *front = min;
+        }
+    }
+}
+
+/* Case insensitive string comparisons using a "natural order" algorithm */
+int strnatcasecmp(const char *s1, const char *s2)
+{
+    /* Converts the first letters to lowercase */
+    char c1 = s1[0] | ' ', c2 = s2[0] | ' ';
+
+    if (c1 < c2)
+        return -1;
+    if (c1 > c2)
+        return 1;
+
+    size_t s1_len = strlen(s1);
+    size_t s2_len = strlen(s2);
+
+    if (s1_len < s2_len)
+        return -1;
+    if (s1_len > s2_len)
+        return 1;
+
+    for (int i = 1; i < s1_len; i++) {
+        c1 = s1[i] | ' ';
+        c2 = s2[i] | ' ';
+        if (c1 != c2)
+            return c1 < c2 ? -1 : 1;
+    }
+    return 0;
 }
