@@ -47,7 +47,7 @@ void add_cmd(char *name, cmd_function operation, char *documentation);
 /* Add a new parameter */
 void add_param(char *name,
                int *valp,
-               char *doccumentation,
+               char *documentation,
                setter_function setter);
 
 /* Extract integer from text and store at loc */
